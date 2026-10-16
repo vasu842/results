@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Results Portal</title>
+    <!-- Using a modern CSS framework for quick, clean styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; border-radius: 12px; }
+        .admin-header { background: linear-gradient(135deg, #4b6584, #1c2431); color: white; padding: 20px; border-radius: 12px 12px 0 0; }
+        .stat-card { border-left: 5px solid #0d6efd; }
+        .table-responsive { max-height: 400px; overflow-y: auto; }
+        .badge-pass { background-color: #d1e7dd; color: #0f5132; }
+        .badge-fail { background-color: #f8d7da; color: #842029; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">🎓 EduResults Portal</a>
+            <div class="d-flex align-items-center">
+                <span id="userGreeting" class="text-light me-3">Welcome, Guest</span>
+                <button id="logoutBtn" class="btn btn-outline-light btn-sm hidden">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        
+        <!-- ==================== LOGIN SECTION ==================== -->
+        <div id="loginSection" class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4><i class="bi bi-lock"></i> Secure Login</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label class="form-label">Role</label>
+                                <select class="form-select" id="loginRole" required>
+                                    <option value="student">Student</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">ID / Username</label>
+                                <input type="text" class="form-control" id="loginId" placeholder="e.g., STU001 or admin" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <!-- Note: In real apps, this goes to a server. Here we simulate. -->
+                                <input type="password" class="form-control" id="loginPass" placeholder="Enter password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                        </form>
+                        <div class="alert alert-info mt-3 small">
+                            <strong>Demo Credentials:</strong><br>
+                            Admin: <code>admin</code> / <code>admin123</code><br>
+                            Student: <code>STU001</code> / <code>pass</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== STUDENT VIEW ==================== -->
+        <div id="studentSection" class="row justify-content-center hidden">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-file-earmark-text"></i> My Result Card</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="studentResultDisplay">
+                            <p class="text-center text-muted">Loading results...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== ADMIN CONTROL CENTER ==================== -->
+        <div id="adminSection" class="hidden">
+            <div class="admin-header d-flex justify-content-between align-items-center">
+                <h4><i class="bi bi-shield-lock"></i> Admin Control Center</h4>
+                <button class="btn btn-light btn-sm" onclick="window.print()">
+                    <i class="bi bi-printer"></i> Print Report
+                </button>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <!-- Stats Row -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card stat-card bg-white">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Total Students</h6>
+                                    <h3 id="statTotal">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stat-card bg-white" style="border-left-color: #198754;">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Passed</h6>
+                                    <h3 id="statPass">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stat-card bg-white" style="border-left-color: #dc3545;">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Failed</h6>
+                                    <h3 id="statFail">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add/Edit Form -->
+                    <div class="card mb-4 bg-light">
+                        <div class="card-header">
+                            <h6 id="formTitle">Add New Result</h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="adminResultForm" class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Student ID</label>
+                                    <input type="text" class="form-control" id="resId" placeholder="STU001" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Student Name</label>
+                                    <input type="text" class="form-control" id="resName" placeholder="John Doe" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Total Marks (100)</label>
+                                    <input type="number" class="form-control" id="resMarks" min="0" max="100" value="0" required>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                                        <i class="bi bi-save"></i> Save Result
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="resetFormBtn">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Results Table -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>Manage All Results</h6>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Marks</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminTableBody">
+                                    <!-- Rows generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Our Main Logic -->
+    <script src="data.js"></script>
+</body>
+</html>
